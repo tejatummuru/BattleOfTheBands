@@ -117,7 +117,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import artistData from './artists_data.json'; // Path to your JSON file
 import albumData from './albums_data.json'; // Path to your JSON file
 
-const Band = ({ selectedArtistName }) => {
+const Band = ({ selectedArtist, setSelectedArtist }) => {
     const initialBand = {
         pop: [],
         rock: [],
@@ -192,46 +192,47 @@ const Band = ({ selectedArtistName }) => {
         return updatedBand;
     });
 };
-    const handleSelectArtist = (artistName) => {
-        console.log('Current band state before update:', band);
-        const artistNameLower = artistName.toLowerCase();
-        const artist = artistData.artists.find(a => a.name.toLowerCase() === artistNameLower);
-    
-        if (!artist) {
-            console.log('Artist not found');
-            return;
+const handleSelectArtist = (artist) => {
+    if (!artist) {
+        console.log('Artist not found');
+        return;
+    }
+
+    // Loop through the artist's genres to find the first available slot
+    let genreAdded = false;
+    for (const genre of artist.genres) {
+        const mappedGenre = mapGenreToCategory([genre]);
+        if (!band[mappedGenre].length) {
+            console.log(`Adding ${artist.name} to ${mappedGenre}`);
+            setBand(prevBand => {
+                const updatedBand = {
+                    ...prevBand,
+                    [mappedGenre]: [...prevBand[mappedGenre], artist]
+                };
+
+                // Update band popularity after setting the new band state
+                updateBandPopularity(updatedBand);
+
+                return updatedBand;
+            });
+            genreAdded = true;
+            break; // Exit after adding artist to the first available genre
         }
-    
-        // Try to fit the artist into one of their genres
-        for (const genre of artist.genres) {
-            const mappedGenre = mapGenreToCategory([genre]);
-            if (!band[mappedGenre].length) {
-                console.log(`Adding ${artist.name} to ${mappedGenre}`);
-                setBand(prevBand => {
-                    const updatedBand = {
-                        ...prevBand,
-                        [mappedGenre]: [...prevBand[mappedGenre], artist]
-                    };
-    
-                    // Update band popularity after setting the new band state
-                    updateBandPopularity(updatedBand, artist, mappedGenre);
-    
-                    return updatedBand;
-                });
-                return; // Exit after adding artist
-            }
-        }
-    
-        console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, and we already have members in the band for those.`);
-    };
-    
+    }
+
+    if (!genreAdded) {
+        console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, but all their genres are already occupied in the band.`);
+    }
+};
+
 
 useEffect(() => {
-    console.log(`useEffect called with name: ${selectedArtistName}`);
-    if (selectedArtistName) {
-        handleSelectArtist(selectedArtistName);
+    if (selectedArtist) {
+        handleSelectArtist(selectedArtist);
     }
-}, [selectedArtistName]);// Ensure that this effect runs only when selectedArtistName changes  
+}, [selectedArtist]);
+      
+
 const updateBandPopularity = (updatedBand) => {
     let newBandPopularity = 20; // Base popularity
 
@@ -265,10 +266,6 @@ const updateBandPopularity = (updatedBand) => {
     setBandPopularity(newBandPopularity);
 };
 
-  
-
-
-  
 return (
     <View>
         <Text>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>

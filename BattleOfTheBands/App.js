@@ -79,46 +79,85 @@
 // });
 
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import Band from './band'; // Make sure the path is correct
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, ScrollView } from 'react-native';
+import Band from './band';
+import artistData from './artists_data.json'; // Import your artist data
 
 const App = () => {
-  const [selectedArtistName, setSelectedArtistName] = useState('');
-  const [refreshBandKey, setRefreshBandKey] = useState(0); // Added for refreshing the Band component
-  const sampleArtists = ["Artist 1", "Artist 2", "Artist 3", "Artist 4", "Artist 5", "Artist 6", "Artist 7"];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [bandKey, setBandKey] = useState(0);
 
-  const selectArtist = (artistName) => {
-    setSelectedArtistName(artistName);
-    setRefreshBandKey(prevKey => prevKey + 1);
-    // Reset the selected artist name after adding them to the band
-    setTimeout(() => {
-        setSelectedArtistName('');
-    }, 100);
-};
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    searchInput: {
-      height: 40,
-      width: '80%',
-      borderColor: 'gray',
-      borderWidth: 1,
-      padding: 10,
-    },
-  });
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+  };
+
+  const handleSelectArtist = (artist) => {
+    setSelectedArtist(artist);
+    setSearchQuery(''); // Clear search input
+    // Increment key to force refresh Band component with new artist
+    setBandKey(prevKey => prevKey + 1);
+  };
+
+  // Filter the artist data based on the search query
+  const filteredArtists = artistData.artists.filter((artist) =>
+    artist.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
-      {sampleArtists.map(artistName => (
-        <TouchableOpacity key={artistName} onPress={() => selectArtist(artistName)}>
-          <Text>Add {artistName}</Text>
-        </TouchableOpacity>
-      ))}
-      <Band selectedArtistName={selectedArtistName} />
+      <TextInput
+        style={styles.searchInput}
+        value={searchQuery}
+        onChangeText={handleSearch}
+        placeholder="Search for Artists"
+      />
+      {searchQuery.length > 0 && (
+        <ScrollView style={styles.resultsContainer}>
+          {filteredArtists.map((artist) => (
+            <TouchableOpacity key={artist.id} onPress={() => handleSelectArtist(artist)}>
+              <Text style={styles.artistItem}>{artist.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+      {/* Pass the selectedArtist and key to the Band component */}
+      <Band
+      selectedArtist={selectedArtist}
+      setSelectedArtist={setSelectedArtist} // Pass the setter to Band
+    />
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    alignItems: 'center',
+  },
+  searchInput: {
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+  },
+  resultsContainer: {
+    marginTop: 10,
+    width: '80%',
+    maxHeight: 200,
+    backgroundColor: '#fff',
+    borderColor: 'gray',
+    borderWidth: 1,
+  },
+  artistItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
+  },
+});
+
 export default App;
+
+
