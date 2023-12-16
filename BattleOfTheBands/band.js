@@ -113,7 +113,7 @@
 // export default Band;
 
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import artistData from './artists_data.json'; // Path to your JSON file
 import albumData from './albums_data.json'; // Path to your JSON file
 
@@ -177,33 +177,54 @@ const Band = ({ selectedArtistName }) => {
     }
     return "world"; // Default category if no match
   };
+  const handleRemoveArtist = (artistId, genre) => {
+    console.log(`Removing artist with ID: ${artistId} from ${genre}`);
+    setBand(prevBand => {
+        // Filter out the artist from the specific genre
+        const updatedGenreArtists = prevBand[genre].filter(artist => artist.id !== artistId);
+        // Update the band without the removed artist
+        const updatedBand = { ...prevBand, [genre]: updatedGenreArtists };
+        console.log('Band state after removal:', updatedBand);
 
-  const handleSelectArtist = (artistName) => {
-    console.log('Current band state before update:', band);
-    const artistNameLower = artistName.toLowerCase();
-    const artist = artistData.artists.find(a => a.name.toLowerCase() === artistNameLower);
+        // Recalculate the band popularity
+        updateBandPopularity(updatedBand);
 
-    if (!artist) {
-        console.log('Artist not found');
-        return;
-    }
-
-    // Try to fit the artist into one of their genres
-    for (const genre of artist.genres) {
-        const mappedGenre = mapGenreToCategory([genre]);
-        if (!band[mappedGenre].length) {
-            console.log(`Adding ${artist.name} to ${mappedGenre}`);
-            setBand(prevBand => ({
-                ...prevBand,
-                [mappedGenre]: [...prevBand[mappedGenre], artist]
-            }));
-            updateBandPopularity(artist, mappedGenre);
-            return; // Exit after adding artist
-        }
-    }
-
-    console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, and we already have members in the band for those.`);
+        return updatedBand;
+    });
 };
+    const handleSelectArtist = (artistName) => {
+        console.log('Current band state before update:', band);
+        const artistNameLower = artistName.toLowerCase();
+        const artist = artistData.artists.find(a => a.name.toLowerCase() === artistNameLower);
+    
+        if (!artist) {
+            console.log('Artist not found');
+            return;
+        }
+    
+        // Try to fit the artist into one of their genres
+        for (const genre of artist.genres) {
+            const mappedGenre = mapGenreToCategory([genre]);
+            if (!band[mappedGenre].length) {
+                console.log(`Adding ${artist.name} to ${mappedGenre}`);
+                setBand(prevBand => {
+                    const updatedBand = {
+                        ...prevBand,
+                        [mappedGenre]: [...prevBand[mappedGenre], artist]
+                    };
+    
+                    // Update band popularity after setting the new band state
+                    updateBandPopularity(updatedBand, artist, mappedGenre);
+    
+                    return updatedBand;
+                });
+                return; // Exit after adding artist
+            }
+        }
+    
+        console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, and we already have members in the band for those.`);
+    };
+    
 
 useEffect(() => {
     console.log(`useEffect called with name: ${selectedArtistName}`);
@@ -211,45 +232,61 @@ useEffect(() => {
         handleSelectArtist(selectedArtistName);
     }
 }, [selectedArtistName]);// Ensure that this effect runs only when selectedArtistName changes  
+const updateBandPopularity = (updatedBand) => {
+    let newBandPopularity = 20; // Base popularity
 
-const updateBandPopularity = (newArtist, genre) => {
-    console.log(`Updating band popularity for ${newArtist.name} in ${genre} genre.`);
-    let totalPopularityChange = 0;
+    console.log("Starting Band Popularity Recalculation");
 
-    const artistAlbums = albumData.albums.filter(album =>
-        album.artists.some(a => a.id === newArtist.id) && 
-        album.genres.some(albumGenre => mapGenreToCategory([albumGenre]) === genre)
-    );
+    // Loop through each genre in the band
+    for (const genre in updatedBand) {
+      updatedBand[genre].forEach(artist => {
+        // Filter artist's albums by the mapped genre
+        const artistAlbums = albumData.albums.filter(album =>
+          album.artists.some(a => a.id === artist.id) && 
+          album.genres.some(albumGenre => mapGenreToCategory([albumGenre]) === genre)
+        );
 
-    console.log(`Found ${artistAlbums.length} albums for ${newArtist.name} in ${genre} genre.`);
+        console.log(`Calculating popularity change for ${artist.name} in ${genre} genre:`);
 
-    artistAlbums.forEach(album => {
-        const albumPopularityChange = (album.popularity - newArtist.popularity) / newArtist.popularity;
-        console.log(`Album: ${album.name}, Album Popularity: ${album.popularity}, Artist Popularity: ${newArtist.popularity}, Change: ${albumPopularityChange}`);
-        totalPopularityChange += albumPopularityChange;
-    });
+        artistAlbums.forEach(album => {
+          // Calculate the change in popularity for each album
+          const albumPopularityChange = (album.popularity - artist.popularity) / artist.popularity;
+          console.log(`Album: ${album.name}, Album Popularity: ${album.popularity}, Artist Popularity: ${artist.popularity}, Popularity Change: ${albumPopularityChange.toFixed(4)}`);
+          newBandPopularity += albumPopularityChange;
+        });
 
-    const newBandPopularity = bandPopularity + totalPopularityChange;
-    console.log(`Total Popularity Change: ${totalPopularityChange}, New Band Popularity: ${newBandPopularity.toFixed(2)}`);
+        if (artistAlbums.length === 0) {
+          console.log(`No albums found for ${artist.name} in ${genre} genre.`);
+        }
+      });
+    }
 
-    setBandPopularity(prevPopularity => prevPopularity + totalPopularityChange);
+    console.log(`New Band Popularity: ${newBandPopularity.toFixed(2)}`);
+    setBandPopularity(newBandPopularity);
 };
+
+  
 
 
   
-  return (
+return (
     <View>
-      <Text>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
-      {Object.entries(band).map(([genre, artists]) => (
-        <View key={genre}>
-          <Text>{`${genre.toUpperCase()}:`}</Text>
-          {artists.map((artist, index) => (
-            <Text key={index}>{artist.name}</Text>
-          ))}
-        </View>
-      ))}
+        <Text>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
+        {Object.entries(band).map(([genre, artists]) => (
+            <View key={genre}>
+                <Text>{`${genre.toUpperCase()}:`}</Text>
+                {artists.map((artist, index) => (
+                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text>{artist.name}</Text>
+                        <TouchableOpacity onPress={() => handleRemoveArtist(artist.id, genre)}>
+                            <Text style={{ marginLeft: 10, color: 'red' }}>Remove</Text>
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </View>
+        ))}
     </View>
-  );
+);
 };
 
 export default Band;

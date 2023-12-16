@@ -79,17 +79,22 @@
 // });
 
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import Band from './band'; // Make sure the path is correct
 
 const App = () => {
   const [selectedArtistName, setSelectedArtistName] = useState('');
+  const [refreshBandKey, setRefreshBandKey] = useState(0); // Added for refreshing the Band component
   const sampleArtists = ["Artist 1", "Artist 2", "Artist 3", "Artist 4", "Artist 5", "Artist 6", "Artist 7"];
 
   const selectArtist = (artistName) => {
     setSelectedArtistName(artistName);
-  };
-
+    setRefreshBandKey(prevKey => prevKey + 1);
+    // Reset the selected artist name after adding them to the band
+    setTimeout(() => {
+        setSelectedArtistName('');
+    }, 100);
+};
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -104,7 +109,6 @@ const App = () => {
       padding: 10,
     },
   });
-
   return (
     <View style={styles.container}>
       {sampleArtists.map(artistName => (
