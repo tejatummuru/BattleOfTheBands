@@ -116,6 +116,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import artistData from './artists_data.json'; // Path to your JSON file
 import albumData from './albums_data.json'; // Path to your JSON file
+import GenreCard from './genrecard';
 
 const Band = ({ selectedArtist, setSelectedArtist }) => {
     const initialBand = {
@@ -234,6 +235,7 @@ const handleSelectArtist = (artist) => {
     if (!genreAdded) {
         console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, but all their genres are already occupied in the band.`);
     }
+    setSelectedArtist(artist);
 };
 
 
@@ -278,21 +280,13 @@ const updateBandPopularity = (updatedBand) => {
 };
 
 return (
-    <View>
-        <Text>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
+    <View style={{ flex: 1 }}>
+        <Text style={{ textAlign: 'center', margin: 10, fontSize: 20 }}>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
         {Object.entries(band).map(([genre, artists]) => (
-            <View key={genre}>
-                <Text>{`${genre.toUpperCase()}:`}</Text>
-                {artists.map((artist, index) => (
-                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text>{artist.name}</Text>
-                        <TouchableOpacity onPress={() => handleRemoveArtist(artist.id, genre)}>
-                            <Text style={{ marginLeft: 10, color: 'red' }}>Remove</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </View>
+        <GenreCard key={genre} genre={genre} artist={artists[0] || null} />
         ))}
+        </View>
     </View>
 );
 };

@@ -16,18 +16,8 @@
             "images": [
                 {
                     "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5eb1eb16cb1e32a3ec51c01896b",
+                    "url": "data:image/jpeg;base64,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b",
                     "width": 640
-                },
-                {
-                    "height": 320,
-                    "url": "https://i.scdn.co/image/ab676161000051741eb16cb1e32a3ec51c01896b",
-                    "width": 320
-                },
-                {
-                    "height": 160,
-                    "url": "https://i.scdn.co/image/ab6761610000f1781eb16cb1e32a3ec51c01896b",
-                    "width": 160
                 }
             ],
             "name": "Artist 1",
@@ -52,7 +42,7 @@
             "images": [
                 {
                     "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5eb1eb16cb1e32a3ec51c01896b",
+                    "url": "https://www.the-sun.com/wp-content/uploads/sites/6/2021/12/MF-Who-is-Gracie-Abrams-COMP.jpg",
                     "width": 640
                 },
                 {
@@ -88,7 +78,7 @@
             "images": [
                 {
                     "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5eb1eb16cb1e32a3ec51c01896b",
+                    "url": "https://cdn.warnermusic.com.au/media/Maisie_NotAnotherRockstar_1500x1500-EMBARGOED-UNTIL-29-SEPTEMBER_preview.jpg",
                     "width": 640
                 },
                 {
@@ -123,7 +113,7 @@
             "images": [
                 {
                     "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5eb1eb16cb1e32a3ec51c01896b",
+                    "url": "https://www.usmagazine.com/wp-content/uploads/2023/11/Sabrina-Carpenter-Shares-Her-Simple-and-Affordable-Glam-Routine-to-Open-Eras-Tour.jpg?quality=86&strip=all",
                     "width": 640
                 },
                 {
@@ -160,7 +150,7 @@
             "images": [
                 {
                     "height": 640,
-                    "url": "https://i.scdn.co/image/ab6761610000e5eb1eb16cb1e32a3ec51c01896b",
+                    "url": "https://static.wikia.nocookie.net/disney/images/9/9e/Olivia_Rodrigo.jpg/revision/latest/scale-to-width-down/1200?cb=20220603133451",
                     "width": 640
                 },
                 {
