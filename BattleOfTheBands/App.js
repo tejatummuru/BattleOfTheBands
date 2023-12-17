@@ -82,6 +82,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, ScrollView } from 'react-native';
 import Band from './band';
 import artistData from './artists_data.json'; // Import your artist data
+import PixelFlower from './flower';
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,6 +104,9 @@ const App = () => {
   const filteredArtists = artistData.artists.filter((artist) =>
     artist.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const renderFlowersRow = () => {
+    return Array.from({ length: 5 }).map((_, index) => <PixelFlower key={index} />);
+  };
 
   return (
     <View style={styles.container}>
@@ -126,6 +130,9 @@ const App = () => {
       selectedArtist={selectedArtist}
       setSelectedArtist={setSelectedArtist} // Pass the setter to Band
     />
+      <View style={styles.flowersRow}>
+        {renderFlowersRow()}
+      </View>
     </View>
   );
 };
@@ -135,6 +142,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     alignItems: 'center',
+    backgroundColor: '#FFEFFB', // This is a very light pastel pink
+    position: 'relative', // Needed to position the flowers absolutely
   },
   searchInput: {
     height: 40,
@@ -155,6 +164,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'gray',
+  },
+  flowersRow: {
+    position: 'absolute',
+    bottom: 0, // Align to the bottom
+    left: 0,
+    right: 0,
+    display: 'flex',
+    flexDirection: 'row', // Display flowers in a row
+    justifyContent: 'space-evenly', // Evenly space the flowers
   },
 });
 

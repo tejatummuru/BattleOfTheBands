@@ -1,6 +1,12 @@
 // GenreCard.js
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import PixelBorder from './pixelborder';
+
+const pinkShades = ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FF1493', '#DB7093'];
+const borderSize = 10; // Number of pixels for the border
+const pixelSize = 4; // The size of each pixel
+const extendedPinkShades = Array(borderSize).fill(pinkShades).flat();
 
 const GenreCard = ({ genre, artist }) => {
   // Function to get the image URL or a placeholder if not available
@@ -13,7 +19,10 @@ const GenreCard = ({ genre, artist }) => {
   };
 
   return (
-    <View style={styles.card}>
+    <View style={styles.cardContainer}>
+      <PixelBorder colors={extendedPinkShades} orientation="horizontal" pixelSize={pixelSize} />
+      <View style={styles.card}>
+      <PixelBorder colors={extendedPinkShades} orientation="vertical" pixelSize={pixelSize} />
       <Text style={styles.genre}>{genre.toUpperCase()}</Text>
       {artist ? (
         <>
@@ -23,14 +32,23 @@ const GenreCard = ({ genre, artist }) => {
       ) : (
         <Text style={styles.noArtist}>No Artist Selected</Text>
       )}
+        <PixelBorder colors={extendedPinkShades} orientation="vertical" pixelSize={pixelSize} />
+      </View>
+      <PixelBorder colors={extendedPinkShades} orientation="horizontal" pixelSize={pixelSize} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  cardContainer: {
+    margin: 5,
+    padding: 2, // Adjust padding to fit the border size
+    backgroundColor: '#FFC0CB', // Pink background to fill gaps
+    // Add other styles if needed
+  },
   card: {
     borderWidth: 1,
-    borderColor: 'lightgrey',
+    borderColor: 'transparent',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
