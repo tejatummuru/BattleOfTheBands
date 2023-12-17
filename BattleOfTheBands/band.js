@@ -131,10 +131,10 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
 
   const genreMapping = {
     "pop": [
-        "pop", "cantopop", "indie-pop", "k-pop", "mandopop", "pop-film", "power-pop", "synth-pop", "j-pop", "j-idol"
+        "pop", "cantopop", "k-pop", "mandopop", "pop-film", "power-pop", "synth-pop", "j-pop", "j-idol"
     ],
     "rock": [
-        "alt-rock", "alternative", "british", "emo", "grunge", "hard-rock", "indie", "j-rock", "psych-rock", "punk", 
+        "alt-rock", "alternative", "british", "emo", "grunge", "hard-rock", "j-rock", "psych-rock", "punk", 
         "punk-rock", "rock", "rock-n-roll", "rockabilly", "black-metal", "death-metal", "metal", "metal-misc", "metalcore",
         "goth", "heavy-metal", "hardcore", "post-dubstep"
     ],
@@ -151,7 +151,7 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
         "r-n-b", "soul", "disco", "blues", "funk", "groove", "motown", "gospel"
     ],
     "indie": [
-        "indie", "singer-songwriter", "songwriter", "acoustic", "folk", "garage", "lo-fi", "new-age"
+        "indie", "singer-songwriter", "songwriter", "acoustic", "folk", "garage", "lo-fi", "new-age", "indie-pop"
     ],
     "country": [
         "country", "americana", "bluegrass", "honky-tonk", "southern-rock", "cowpunk"
@@ -167,6 +167,10 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
   const [band, setBand] = useState(initialBand);
   const [bandPopularity, setBandPopularity] = useState(20);
 
+ const areAllGenresFilled = () => {
+    return Object.values(band).every(genre => genre.length > 0);
+ };
+
   const mapGenreToCategory = (genres) => {
     for (const genre of genres) {
       for (const category in genreMapping) {
@@ -179,6 +183,10 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
   };
   const handleRemoveArtist = (artistId, genre) => {
     console.log(`Removing artist with ID: ${artistId} from ${genre}`);
+    if (areAllGenresFilled()) {
+        console.log("All genres are filled. Artists cannot be removed.");
+        return;
+    }
     setBand(prevBand => {
         // Filter out the artist from the specific genre
         const updatedGenreArtists = prevBand[genre].filter(artist => artist.id !== artistId);
@@ -197,7 +205,10 @@ const handleSelectArtist = (artist) => {
         console.log('Artist not found');
         return;
     }
-
+    if (areAllGenresFilled()) {
+        console.log("All genres are filled. No more artists can be added.");
+        return;
+    }
     // Loop through the artist's genres to find the first available slot
     let genreAdded = false;
     for (const genre of artist.genres) {
