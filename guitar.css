@@ -1,0 +1,12 @@
+/* guitar.css */
+.animated-guitar {
+  /* Define your animation here */
+  animation: strum 2s infinite ease-in-out;
+  /* Adjust this to the correct rotation point of the guitar */
+  transform-origin: 50% 100%; /* This is an example, it might be `top left` or specific px values */
+}
+
+@keyframes strum {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); /* Adjust this angle to suit the desired animation */ }
+}
