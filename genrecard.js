@@ -1,11 +1,11 @@
 // GenreCard.js
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import PixelBorder from './pixelborder';
 import { generateRandomPinks } from './helper';
 
 
-const GenreCard = ({ genre, artist }) => {
+const GenreCard = ({ genre, artist, onRemoveArtist }) => {
   // Function to get the image URL or a placeholder if not available
   const randomPinkShades = generateRandomPinks(40);
   const getImageUrl = () => {
@@ -35,15 +35,17 @@ const GenreCard = ({ genre, artist }) => {
         </View>
         <View style={styles.card}>
         <Text style={styles.genre}>{genre.toUpperCase()}</Text>
-      {artist ? (
-        <>
-          <Image source={getImageUrl()} style={styles.image} />
-          <Text style={styles.artistName}>{artist.name}</Text>
-        </>
-      ) : (
-        <Text style={styles.noArtist}>No Artist Selected</Text>
-      )}
-        </View>
+        {artist ? (
+          <>
+            <TouchableOpacity onPress={() => onRemoveArtist(artist.id)}>
+            <Image source={getImageUrl()} style={styles.image} />
+          </TouchableOpacity>
+            <Text style={styles.artistName}>{artist.name}</Text>
+          </>
+        ) : (
+          <Text style={styles.noArtist}>No Artist Selected</Text>
+        )}
+      </View>
         {/* Right border */}
         <View style={styles.pixelColumn}>
           {randomPinkShades.map((color, index) => (

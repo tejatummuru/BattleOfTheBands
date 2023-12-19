@@ -117,6 +117,7 @@ import { View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import artistData from './artists_data.json'; // Path to your JSON file
 import albumData from './albums_data.json'; // Path to your JSON file
 import GenreCard from './genrecard';
+import axios from 'axios';
 
 const Band = ({ selectedArtist, setSelectedArtist }) => {
     const initialBand = {
@@ -155,7 +156,7 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
         "indie", "singer-songwriter", "songwriter", "acoustic", "folk", "garage", "lo-fi", "new-age", "indie-pop"
     ],
     "country": [
-        "country", "americana", "bluegrass", "honky-tonk", "southern-rock", "cowpunk"
+        "country", "americana", "bluegrass", "honky-tonk", "southern-rock", "cowpunk", "contemporary country"
     ],
     "world": [
         "afrobeat", "brazil", "latin", "reggae", "reggaeton", "salsa", "samba", "world-music", "african", 
@@ -167,21 +168,33 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
 
   const [band, setBand] = useState(initialBand);
   const [bandPopularity, setBandPopularity] = useState(20);
+  const [albums, setAlbums] = useState([]);
+  const accessToken = 'BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw'; 
+  const [genreOccupiedMessage, setGenreOccupiedMessage] = useState('');
 
  const areAllGenresFilled = () => {
     return Object.values(band).every(genre => genre.length > 0);
  };
 
-  const mapGenreToCategory = (genres) => {
-    for (const genre of genres) {
-      for (const category in genreMapping) {
-        if (genreMapping[category].includes(genre.toLowerCase())) { // Lowercase comparison
+ const mapGenreToCategory = (genres) => {
+  console.log(genres);
+  for (const genre of genres) {
+    console.log(genre);
+    for (const category in genreMapping) {
+      if (genreMapping[category].includes(genre.toLowerCase())) { 
+        return category;
+      }
+
+      // Check if any subgenre within a category includes a part of the Spotify genre
+      for (const subgenre of genreMapping[category]) {
+        if (genre.toLowerCase().includes(subgenre)) {
           return category;
         }
       }
     }
-    return "world"; // Default category if no match
-  };
+  }
+};
+
   const handleRemoveArtist = (artistId, genre) => {
     console.log(`Removing artist with ID: ${artistId} from ${genre}`);
     if (areAllGenresFilled()) {
@@ -201,41 +214,109 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
         return updatedBand;
     });
 };
-const handleSelectArtist = (artist) => {
-    if (!artist) {
-        console.log('Artist not found');
-        return;
-    }
-    if (areAllGenresFilled()) {
-        console.log("All genres are filled. No more artists can be added.");
-        return;
-    }
-    // Loop through the artist's genres to find the first available slot
-    let genreAdded = false;
-    for (const genre of artist.genres) {
-        const mappedGenre = mapGenreToCategory([genre]);
-        if (!band[mappedGenre].length) {
-            console.log(`Adding ${artist.name} to ${mappedGenre}`);
-            setBand(prevBand => {
-                const updatedBand = {
-                    ...prevBand,
-                    [mappedGenre]: [...prevBand[mappedGenre], artist]
-                };
 
-                // Update band popularity after setting the new band state
-                updateBandPopularity(updatedBand);
+// const handleSelectArtist = async (artist) => {
+//   if (!artist) {
+//     console.log('Artist not found');
+//     return;
+//   }
+//   if (areAllGenresFilled()) {
+//     console.log("All genres are filled. No more artists can be added.");
+//     return;
+//   }
+  
+//   // Assuming you have a state variable for albums and accessToke
 
-                return updatedBand;
-            });
-            genreAdded = true;
-            break; // Exit after adding artist to the first available genre
-        }
-    }
+//   let genreAdded = false;
 
-    if (!genreAdded) {
-        console.log(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, but all their genres are already occupied in the band.`);
+//   for (const genre of artist.genres) {
+//     const mappedGenre = mapGenreToCategory([genre]);
+//     console.log(mappedGenre);
+
+//     if (!band[mappedGenre].length) {
+//       console.log(`Adding ${artist.name} to ${mappedGenre}`);
+//       setBand(prevBand => {
+//         const updatedBand = {
+//           ...prevBand,
+//           [mappedGenre]: [...prevBand[mappedGenre], artist]
+//         };
+//         // Update band popularity after setting the new band state
+//         updateBandPopularity(updatedBand, mappedGenre);
+//         return updatedBand;
+//       });
+//       genreAdded = true;
+//       break; // Exit after adding artist to the first available genre
+//     }
+//   }
+//   if (genreAdded) {
+//     try {
+//       const fetchedAlbums = await fetchArtistAlbums(artist.id, accessToken);
+//       console.log('Fetched Albums:', fetchedAlbums); // Debug log
+//       if (Array.isArray(fetchedAlbums)) {
+//         setAlbums(fetchedAlbums); 
+//         updateBandPopularity(fetchedAlbums, artist); 
+//       } else {
+//         console.error('fetchedAlbums is not an array', fetchedAlbums);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching albums:', error);
+//     }
+//   } else {
+//     setGenreOccupiedMessage(`${artist.name} rocks in the genres ${artist.genres.join(', ')}, but the ${mappedGenre} genre is already occupied in the band.`);
+//   } 
+//   setSelectedArtist(artist);
+// };
+
+const handleSelectArtist = async (artist) => {
+  setGenreOccupiedMessage('');
+  if (!artist) {
+    console.log('Artist not found');
+    return;
+  }
+  if (areAllGenresFilled()) {
+    console.log("All genres are filled. No more artists can be added.");
+    return;
+  }
+  
+  // Assuming you have a state variable for albums and accessToke
+
+  let genreAdded = false;
+
+  for (const genre of artist.genres) {
+    const mappedGenre = mapGenreToCategory([genre]);
+    console.log(mappedGenre);
+    if (!band[mappedGenre].length) {
+      console.log(`Adding ${artist.name} to ${mappedGenre}`);
+      setBand(prevBand => {
+        const updatedBand = {
+          ...prevBand,
+          [mappedGenre]: [...prevBand[mappedGenre], artist]
+        };
+        // Update band popularity after setting the new band state
+        updateBandPopularity(updatedBand, mappedGenre);
+        return updatedBand;
+      });
+      genreAdded = true;
+      break; // Exit after adding artist to the first available genre
     }
-    setSelectedArtist(artist);
+  }
+  if (genreAdded) {
+    try {
+      const fetchedAlbums = await fetchArtistAlbums(artist.id, accessToken);
+      console.log('Fetched Albums:', fetchedAlbums); // Debug log
+      if (Array.isArray(fetchedAlbums)) {
+        setAlbums(fetchedAlbums); 
+        updateBandPopularity(fetchedAlbums, artist); 
+      } else {
+        console.error('fetchedAlbums is not an array', fetchedAlbums);
+      }
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+    }
+  } else {
+    setGenreOccupiedMessage(`${artist.name} rocks in the genre(s) ${artist.genres.join(', ')}, but all their genre(s) are already occupied in the band.`);
+  }
+  setSelectedArtist(artist);
 };
 
 
@@ -245,52 +326,83 @@ useEffect(() => {
     }
 }, [selectedArtist]);
       
+const fetchArtistAlbums = async (artistId, accessToken) => {
+  try {
+    const endpoint = `https://api.spotify.com/v1/artists/${artistId}/albums`;
+    const response = await axios.get(endpoint, {
+      headers: {
+        'Authorization': `Bearer BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw`
+      },
+      params: {
+        include_groups: 'album,single',
+        limit: 20
+      }
+    });
+    console.log('Response Data:', response.data.items); // Debug log
+    return response.data.items;
+    } catch (error) {
+    console.error('Error fetching albums:', error);
+    return []; // Return an empty array in case of an error
+  }
+};
 
-const updateBandPopularity = (updatedBand) => {
-    let newBandPopularity = 20; // Base popularity
+const updateBandPopularity = async (fetchedAlbums, artist, mappedGenre) => {
+  let newBandPopularity = 20; // Start with a base popularity
 
-    console.log("Starting Band Popularity Recalculation");
+  try {
+    const artistAlbums = fetchedAlbums;
+    for (const album of artistAlbums) {
+      // Fetch individual album details for popularity
+      const albumDetail = await fetchAlbumDetails(album.id, accessToken);
+      
+      // Check if the album's genre is different from the artist's genre
 
-    // Loop through each genre in the band
-    for (const genre in updatedBand) {
-      updatedBand[genre].forEach(artist => {
-        // Filter artist's albums by the mapped genre
-        const artistAlbums = albumData.albums.filter(album =>
-          album.artists.some(a => a.id === artist.id) && 
-          album.genres.some(albumGenre => mapGenreToCategory([albumGenre]) === genre)
-        );
-
-        console.log(`Calculating popularity change for ${artist.name} in ${genre} genre:`);
-
-        artistAlbums.forEach(album => {
-          // Calculate the change in popularity for each album
-          const albumPopularityChange = (album.popularity - artist.popularity) / artist.popularity;
-          console.log(`Album: ${album.name}, Album Popularity: ${album.popularity}, Artist Popularity: ${artist.popularity}, Popularity Change: ${albumPopularityChange.toFixed(4)}`);
-          newBandPopularity += albumPopularityChange;
-        });
-
-        if (artistAlbums.length === 0) {
-          console.log(`No albums found for ${artist.name} in ${genre} genre.`);
-        }
-      });
+      if (!albumDetail.genres.some(genre => genre== mappedGenre)) {
+        const albumPopularityChange = (albumDetail.popularity - artist.popularity) / artist.popularity;
+        console.log(albumDetail);
+        newBandPopularity += albumPopularityChange;
+      }
     }
+  } catch (error) {
+    console.error('Error in updating band popularity:', error);
+  }
 
-    console.log(`New Band Popularity: ${newBandPopularity.toFixed(2)}`);
-    setBandPopularity(newBandPopularity);
+  setBandPopularity(newBandPopularity);
+};
+
+const fetchAlbumDetails = async (albumId, accessToken) => {
+  const endpoint = `https://api.spotify.com/v1/albums/${albumId}`;
+  const response = await axios.get(endpoint, {
+    headers: {
+      'Authorization': `Bearer BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw`
+    }
+  });
+  return response.data; // This will return detailed album data including popularity
 };
 
 return (
-    <View style={styles.bandContainer}>
-      <Text style={styles.popularityText}>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
-      <View style={styles.cardsContainer}>
-        {Object.entries(band).map(([genre, artists]) => (
-          <GenreCard key={genre} genre={genre} artist={artists[0] || null} />
-        ))}
-      </View>
+  <View style={styles.bandContainer}>
+    <Text style={styles.popularityText}>Total Band Popularity: {bandPopularity.toFixed(2)}</Text>
+    {genreOccupiedMessage && <Text style={styles.messageText}>{genreOccupiedMessage}</Text>}
+    <View style={styles.cardsContainer}>
+      {Object.entries(band).map(([genre, artists]) => (
+        <GenreCard 
+          key={genre} 
+          genre={genre} 
+          artist={artists[0] || null}
+          onRemoveArtist={() => handleRemoveArtist(artists[0]?.id, genre)} // Pass the artist ID and genre for removal
+        />
+      ))}
     </View>
-  );
+  </View>
+);
 };
 const styles = StyleSheet.create({
+  messageText: {
+    textAlign: 'center',
+    color: 'red', // Adjust the color as needed
+    margin: 10,
+  },
     bandContainer: {
       flex: 1,
       alignItems: 'center',

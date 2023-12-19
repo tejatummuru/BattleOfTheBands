@@ -85,15 +85,47 @@ import artistData from './artists_data.json'; // Import your artist data
 import PixelFlower from './flower';
 import Guitar from './guitar';
 import * as Font from 'expo-font';
+import axios from 'axios';
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [bandKey, setBandKey] = useState(0);
+  const [searchResults, setSearchResults] = useState([]); // New state to hold search results
 
-  const handleSearch = (text) => {
+  const handleSearch = async (text) => {
     setSearchQuery(text);
+    if (text.length > 0) {
+      try {
+        // Spotify API endpoint for searching artists
+        const endpoint = `https://api.spotify.com/v1/search`;
+        const response = await axios.get(endpoint, { // The response is defined here inside the try block
+          headers: {
+            'Authorization': `Bearer ${'BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw'}`
+          },
+          params: {
+            q: text,
+            type: 'artist',
+            limit: 10
+          }
+        });
+        
+        // Use response here, inside the same block
+        const artists = response.data.artists.items;
+        console.log(artists);
+        setSearchResults(artists); // Update the state with the fetched artists
+      } catch (error) {
+        console.error('Error fetching artists:', error);
+        setSearchResults([]); // Clear results on error
+      }
+    } else {
+      setSearchResults([]); // Clear results when text is cleared
+    }
   };
+
+  // const handleSearch = (text) => {
+  //   setSearchQuery(text);
+  // };
   const [fontLoaded, setFontLoaded] = useState(false);
 
   useEffect(() => {
@@ -142,22 +174,22 @@ const App = () => {
         placeholder="Search for Artists"
       />
       {searchQuery.length > 0 && (
-        <ScrollView style={styles.resultsContainer}>
-          {filteredArtists.map((artist) => (
-            <TouchableOpacity key={artist.id} onPress={() => handleSelectArtist(artist)}>
-              <Text style={styles.artistItem}>{artist.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
+      <ScrollView style={styles.resultsContainer}>
+        {searchResults.map((artist) => ( // Use searchResults to render the list
+          <TouchableOpacity key={artist.id} onPress={() => handleSelectArtist(artist)}>
+            <Text style={styles.artistItem}>{artist.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    )}
       {/* Pass the selectedArtist and key to the Band component */}
       <Band
       selectedArtist={selectedArtist}
       setSelectedArtist={setSelectedArtist} // Pass the setter to Band
     />
-      <View style={styles.flowersRow}>
+      {/* <View style={styles.flowersRow}>
         {renderFlowersRow()}
-      </View>
+      </View> */}
     </View>
   );
 };
