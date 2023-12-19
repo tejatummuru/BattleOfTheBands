@@ -195,24 +195,24 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
   }
 };
 
-  const handleRemoveArtist = (artistId, genre) => {
-    console.log(`Removing artist with ID: ${artistId} from ${genre}`);
-    if (areAllGenresFilled()) {
-        console.log("All genres are filled. Artists cannot be removed.");
-        return;
-    }
-    setBand(prevBand => {
-        // Filter out the artist from the specific genre
-        const updatedGenreArtists = prevBand[genre].filter(artist => artist.id !== artistId);
-        // Update the band without the removed artist
-        const updatedBand = { ...prevBand, [genre]: updatedGenreArtists };
-        console.log('Band state after removal:', updatedBand);
+const handleRemoveArtist = (artistId, genre) => {
+  console.log(`Removing artist with ID: ${artistId} from ${genre}`);
+  if (areAllGenresFilled()) {
+      console.log("All genres are filled. Artists cannot be removed.");
+      return;
+  }
+  setBand(prevBand => {
+    // Filter out the artist from the specific genre
+    const updatedGenreArtists = prevBand[genre].filter(artist => artist.id !== artistId);
+    // Update the band without the removed artist
+    const updatedBand = { ...prevBand, [genre]: updatedGenreArtists };
+    console.log('Band state after removal:', updatedBand);
 
-        // Recalculate the band popularity
-        updateBandPopularity(updatedBand);
+    // Recalculate the band popularity with the updated band
+    updateBandPopularity(updatedBand);
 
-        return updatedBand;
-    });
+    return updatedBand;
+  });
 };
 
 // const handleSelectArtist = async (artist) => {
@@ -346,29 +346,30 @@ const fetchArtistAlbums = async (artistId, accessToken) => {
   }
 };
 
-const updateBandPopularity = async (fetchedAlbums, artist, mappedGenre) => {
+const updateBandPopularity = async (updatedBand, mappedGenre) => {
   let newBandPopularity = 20; // Start with a base popularity
 
-  try {
-    const artistAlbums = fetchedAlbums;
-    for (const album of artistAlbums) {
-      // Fetch individual album details for popularity
-      const albumDetail = await fetchAlbumDetails(album.id, accessToken);
-      
-      // Check if the album's genre is different from the artist's genre
+  for (const genre in updatedBand) {
+    for (const artist of updatedBand[genre]) {
+      // Fetch albums for the artist
+      const artistAlbums = await fetchArtistAlbums(artist.id);
 
-      if (!albumDetail.genres.some(genre => genre== mappedGenre)) {
-        const albumPopularityChange = (albumDetail.popularity - artist.popularity) / artist.popularity;
-        console.log(albumDetail);
-        newBandPopularity += albumPopularityChange;
+      for (const album of artistAlbums) {
+        const albumDetail = await fetchAlbumDetails(album.id, accessToken);
+
+        // Check if the album's genre is different from the artist's current genre
+        if (!albumDetail.genres.some(genre => genre === mappedGenre)) {
+          const albumPopularityChange = (albumDetail.popularity - artist.popularity) / artist.popularity;
+          newBandPopularity += albumPopularityChange;
+        }
       }
     }
-  } catch (error) {
-    console.error('Error in updating band popularity:', error);
   }
 
   setBandPopularity(newBandPopularity);
 };
+
+
 
 const fetchAlbumDetails = async (albumId, accessToken) => {
   const endpoint = `https://api.spotify.com/v1/albums/${albumId}`;
