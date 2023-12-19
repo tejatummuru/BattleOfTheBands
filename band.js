@@ -196,9 +196,10 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
 };
 
 const handleRemoveArtist = (artistId, genre) => {
+  setGenreOccupiedMessage(' ');
   console.log(`Removing artist with ID: ${artistId} from ${genre}`);
   if (areAllGenresFilled()) {
-      console.log("All genres are filled. Artists cannot be removed.");
+    setGenreOccupiedMessage('All genres are filled. No more artists can be added.');
       return;
   }
   setBand(prevBand => {
@@ -274,7 +275,7 @@ const handleSelectArtist = async (artist) => {
     return;
   }
   if (areAllGenresFilled()) {
-    console.log("All genres are filled. No more artists can be added.");
+    setGenreOccupiedMessage('All genres are filled. No more artists can be added.');
     return;
   }
   
