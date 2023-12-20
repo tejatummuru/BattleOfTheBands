@@ -1,13 +1,25 @@
 // GenreCard.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import PixelBorder from './pixelborder';
 import { generateRandomPinks } from './helper';
+import * as Font from 'expo-font';
 
 
 const GenreCard = ({ genre, artist, onRemoveArtist }) => {
   // Function to get the image URL or a placeholder if not available
   const randomPinkShades = generateRandomPinks(40);
+  const [fontLoaded, setFontLoaded] = useState(false);
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Monster': require('./assets/fonts/MonsterFriendFore.otf'), // Update the path to where your font file is located
+      });
+      setFontLoaded(true);
+    }
+
+    loadFonts();
+  }, []);
   const getImageUrl = () => {
     if (artist && artist.images && artist.images.length > 0) {
       return { uri: artist.images[0].url };
@@ -117,7 +129,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },  
   genre: {
-    fontWeight: 'bold',
+    fontWeight: 'thin',
+    fontFamily: 'Monster',
     marginBottom: 5,
   },
   image: {

@@ -118,6 +118,7 @@ import artistData from './artists_data.json'; // Path to your JSON file
 import albumData from './albums_data.json'; // Path to your JSON file
 import GenreCard from './genrecard';
 import axios from 'axios';
+import * as Font from 'expo-font';
 
 const Band = ({ selectedArtist, setSelectedArtist }) => {
     const initialBand = {
@@ -171,7 +172,18 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
   const [albums, setAlbums] = useState([]);
   const accessToken = 'BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw'; 
   const [genreOccupiedMessage, setGenreOccupiedMessage] = useState('');
+  const [fontLoaded, setFontLoaded] = useState(false);
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Selamat': require('./assets/fonts/SelamatPestaNatal.ttf'), // Update the path to where your font file is located
+        'Bit': require('./assets/fonts/8-bit-hud.ttf'),
+      });
+      setFontLoaded(true);
+    }
 
+    loadFonts();
+  }, []);
  const areAllGenresFilled = () => {
     return Object.values(band).every(genre => genre.length > 0);
  };
@@ -404,6 +416,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'red', // Adjust the color as needed
     margin: 10,
+    fontFamily: 'Bit',
   },
     bandContainer: {
       flex: 1,
@@ -414,6 +427,7 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       margin: 10,
       fontSize: 20,
+      fontFamily: 'Selamat',
     },
     cardsContainer: {
         flexDirection: 'row',
