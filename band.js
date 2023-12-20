@@ -170,13 +170,13 @@ const Band = ({ selectedArtist, setSelectedArtist }) => {
   const [band, setBand] = useState(initialBand);
   const [bandPopularity, setBandPopularity] = useState(20);
   const [albums, setAlbums] = useState([]);
-  const accessToken = 'BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw'; 
+  const accessToken = 'BQCCONZELfPaQW1xIWJl1lsHoGOBwCooDIrC-0Av-ADs2kxgeImFBq4OEkoIjGPqq3Vs9286n8elTeVs01csnHy2Gk7cVEiDzcIoB4Ygwj_JJ6y8uMc'; 
   const [genreOccupiedMessage, setGenreOccupiedMessage] = useState('');
   const [fontLoaded, setFontLoaded] = useState(false);
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        'Selamat': require('./assets/fonts/SelamatPestaNatal.ttf'), // Update the path to where your font file is located
+        'Selamat': require('./assets/fonts/Starry Fayez.otf'), // Update the path to where your font file is located
         'Bit': require('./assets/fonts/8-bit-hud.ttf'),
       });
       setFontLoaded(true);
@@ -344,7 +344,7 @@ const fetchArtistAlbums = async (artistId, accessToken) => {
     const endpoint = `https://api.spotify.com/v1/artists/${artistId}/albums`;
     const response = await axios.get(endpoint, {
       headers: {
-        'Authorization': `Bearer BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw`
+        'Authorization': `Bearer BQCCONZELfPaQW1xIWJl1lsHoGOBwCooDIrC-0Av-ADs2kxgeImFBq4OEkoIjGPqq3Vs9286n8elTeVs01csnHy2Gk7cVEiDzcIoB4Ygwj_JJ6y8uMc`
       },
       params: {
         include_groups: 'album,single',
@@ -388,7 +388,7 @@ const fetchAlbumDetails = async (albumId, accessToken) => {
   const endpoint = `https://api.spotify.com/v1/albums/${albumId}`;
   const response = await axios.get(endpoint, {
     headers: {
-      'Authorization': `Bearer BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw`
+      'Authorization': `Bearer BQCCONZELfPaQW1xIWJl1lsHoGOBwCooDIrC-0Av-ADs2kxgeImFBq4OEkoIjGPqq3Vs9286n8elTeVs01csnHy2Gk7cVEiDzcIoB4Ygwj_JJ6y8uMc`
     }
   });
   return response.data; // This will return detailed album data including popularity

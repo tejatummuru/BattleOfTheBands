@@ -14,6 +14,8 @@ const GenreCard = ({ genre, artist, onRemoveArtist }) => {
     async function loadFonts() {
       await Font.loadAsync({
         'Monster': require('./assets/fonts/MonsterFriendFore.otf'), // Update the path to where your font file is located
+        'Artist': require('./assets/fonts/W95FA.otf'),
+        'Selamat': require('./assets/fonts/cutie-top.ttf'),
       });
       setFontLoaded(true);
     }
@@ -139,9 +141,13 @@ const styles = StyleSheet.create({
   },
   artistName: {
     marginTop: 5,
+    fontFamily: 'Artist',
+    fontWeight: 'bold',
   },
   noArtist: {
     color: 'grey',
+    fontFamily: 'Artist',
+    justifyContent: 'center',
   },
 });
 

@@ -101,7 +101,7 @@ const App = () => {
         const endpoint = `https://api.spotify.com/v1/search`;
         const response = await axios.get(endpoint, { // The response is defined here inside the try block
           headers: {
-            'Authorization': `Bearer ${'BQC402KXoLOPl0iIzUePFfGXJNQdYgYxF-od1oPKSNdEDEBe9-t6F47TmDgFxUTwm5M64FlK831J7aYUeN5-U9cCXQyPz3rPGIjejUyhGBXS9ggfXNw'}`
+            'Authorization': `Bearer ${'BQCCONZELfPaQW1xIWJl1lsHoGOBwCooDIrC-0Av-ADs2kxgeImFBq4OEkoIjGPqq3Vs9286n8elTeVs01csnHy2Gk7cVEiDzcIoB4Ygwj_JJ6y8uMc'}`
           },
           params: {
             q: text,

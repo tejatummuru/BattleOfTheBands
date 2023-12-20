@@ -83,7 +83,18 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Text, ScrollView } from 
 import Band from './band';
 import artistData from './artists_data.json'; // Import your artist data
 import PixelFlower from './flower';
+import * as Font from 'expo-font';
+const [fontLoaded, setFontLoaded] = useState(false);
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Artist': require('./assets/fonts/W95FA.otf'),
+      });
+      setFontLoaded(true);
+    }
 
+    loadFonts();
+  }, []);
 const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArtist, setSelectedArtist] = useState(null);
@@ -151,6 +162,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     padding: 10,
+    fontFamily: 'Artist',
   },
   resultsContainer: {
     marginTop: 10,
